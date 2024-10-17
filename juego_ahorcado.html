@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego del Ahorcado</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        const palabras = ["bienvenido", "javascript", "html", "css", "programacion", "computadora"];
+        let palabraSeleccionada = '';
+        let letrasIncorrectas = [];
+        let letrasCorrectas = [];
+        let intentos = 6;
+
+        // Arreglos de GIFs
+        const gifsCorrectos = ["a0e8cce5296302f25dbc178d91626d47.gif", "aplausos.gif", "homer-simpson-icegif-10.gif"];
+        const gifsIncorrectos = ["no-no-no.gif", "M3gMmi6.gif", "200w.gif"];
+
+        function iniciarJuego() {
+            palabraSeleccionada = palabras[Math.floor(Math.random() * palabras.length)];
+            letrasIncorrectas = [];
+            letrasCorrectas = [];
+            intentos = 6; // Reiniciar intentos
+            document.getElementById("resultado").innerText = '';
+            document.getElementById("intentos").innerText = `Intentos restantes: ${intentos}`;
+            mostrarPalabra();
+            document.getElementById("siguiente").style.display = 'none'; // Ocultar botón de Siguiente
+            document.getElementById("reiniciar").style.display = 'none'; // Ocultar botón de Reiniciar
+            document.getElementById("muñeco").src = ''; // Mostrar muñeco vacío
+            document.getElementById("gifResultado").style.display = 'none'; // Ocultar GIF de resultado
+
+            const nombreUsuario = localStorage.getItem('nombreUsuario');
+            const generoUsuario = localStorage.getItem('generoUsuario');
+            if (nombreUsuario) {
+                const saludo = generoUsuario === 'mujer' ? `Bienvenida, ${nombreUsuario}!` : `Bienvenido, ${nombreUsuario}!`;
+                document.getElementById("bienvenida").innerText = saludo;
+            }
+        }
+
+        function mostrarPalabra() {
+            const palabraElemento = document.getElementById("palabra");
+            palabraElemento.innerHTML = '';
+
+            for (const letra of palabraSeleccionada) {
+                const letraElemento = document.createElement("span");
+                letraElemento.innerText = letrasCorrectas.includes(letra) ? letra : '_';
+                palabraElemento.appendChild(letraElemento);
+            }
+        }
+
+        function adivinarLetra() {
+            const inputLetra = document.getElementById("inputLetra").value;
+            if (inputLetra && !letrasIncorrectas.includes(inputLetra) && !letrasCorrectas.includes(inputLetra)) {
+                if (palabraSeleccionada.includes(inputLetra)) {
+                    letrasCorrectas.push(inputLetra);
+                    // Mostrar un GIF aleatorio para letra correcta
+                    const randomCorrectGif = gifsCorrectos[Math.floor(Math.random() * gifsCorrectos.length)];
+                    document.getElementById("gifResultado").src = randomCorrectGif; 
+                    document.getElementById("gifResultado").style.display = 'block'; // Mostrar GIF de correcta
+                } else {
+                    letrasIncorrectas.push(inputLetra);
+                    intentos--;
+                    document.getElementById("muñeco").src = `img/trump-draw.gif${6 - intentos}.png`; // Cambiar imagen del muñeco
+                    // Mostrar un GIF aleatorio para letra incorrecta
+                    const randomIncorrectGif = gifsIncorrectos[Math.floor(Math.random() * gifsIncorrectos.length)];
+                    document.getElementById("gifResultado").src = randomIncorrectGif; 
+                    document.getElementById("gifResultado").style.display = 'block'; // Mostrar GIF de incorrecta
+                }
+
+                document.getElementById("intentos").innerText = `Intentos restantes: ${intentos}`;
+                mostrarPalabra();
+                document.getElementById("inputLetra").value = '';
+
+                if (intentos === 0) {
+                    document.getElementById("resultado").innerText = `¡Perdiste! La palabra era "${palabraSeleccionada}"`;
+                    // Mostrar el GIF cuando el jugador pierde
+                    document.getElementById("gifResultado").src = "gato tom.gif"; // Ruta del GIF de perder
+                    document.getElementById("gifResultado").style.display = 'block'; // Mostrar GIF de perder
+                    document.getElementById("reiniciar").style.display = 'block'; // Mostrar botón de Reiniciar
+                } else if (palabraSeleccionada.split('').every(letra => letrasCorrectas.includes(letra))) {
+                    document.getElementById("resultado").innerText = '¡Ganaste!';
+                    // Mostrar el GIF cuando el jugador gana
+                    document.getElementById("gifResultado").src = "trump-draw.gif"; // Ruta del GIF de ganar
+                    document.getElementById("gifResultado").style.display = 'block'; // Mostrar GIF de ganar
+                    document.getElementById("siguiente").style.display = 'block'; // Mostrar botón de Siguiente
+                }
+            }
+        }
+
+        function siguienteJuego() {
+            window.location.href = ""; // Redirigir a la página de sopa de letras
+        }
+
+        function reiniciarJuego() {
+            iniciarJuego(); // Reiniciar el juego
+        }
+
+        window.onload = iniciarJuego;
+    </script>
+</head>
+<body>
+    <video autoplay muted loop id="backgroundVideo">
+        <source src="strellas.mp4" type="video/mp4">
+        Tu navegador no soporta el video.
+    </video>
+
+    <h1>Juego del Ahorcado</h1>
+    <div id="bienvenida"></div>
+    <div id="palabra"></div>
+    <div id="intentos"></div>
+    <input type="text" id="inputLetra" maxlength="1" placeholder="Introduce una letra" />
+    <button onclick="adivinarLetra()">Adivinar</button>
+    <div id="resultado"></div>
+    <button id="siguiente" style="display: none;" onclick="siguienteJuego()">Siguiente</button>
+    <button id="reiniciar" style="display: none;" onclick="reiniciarJuego()">Iniciar de nuevo</button>
+    
+    <img id="muñeco" src="" alt="" style="width: 200px; margin-top: 30px;" />
+    <img id="gifResultado" src="" alt="Resultado del Juego" style="display: none; width: 200px; margin-top: 30px;" />
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            position: relative; 
+            overflow: hidden; 
+        }
+
+        #backgroundVideo {
+            position: absolute; 
+            top: 0;
+            left: 0;
+            width: 100%; 
+            height: 100%;
+            object-fit: cover; 
+            z-index: -1; 
+        }
+
+        h1 {
+            color: rgb(17, 20, 68);
+        }
+
+        button {
+            background-color: rgb(17, 20, 68);
+            color: white;
+            border: none;
+            padding: 10px 10px;
+            text-align: center;
+            display: inline-block;
+            font-size: 1em;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 20px;
+            transition: background-color 0.4s;
+        }
+
+        button:hover {
+            background-color: #565c06;
+            color: #fff;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            button {
+                width: 50%; /* Botones ocupan el ancho completo en móviles */
+            }
+
+            img {
+                width: 100px; /* Ajustar tamaño de las imágenes en móviles */
+                border-radius: 30px;
+            }
+            
+        }
+    </style>
+</body>
+</html>
